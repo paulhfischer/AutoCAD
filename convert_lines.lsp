@@ -1,0 +1,13 @@
+(defun c:convert_lines ()
+  (if (setq lines (ssget '((0 . "LINE"))))
+    (progn
+      (if (> (sslength lines) 1)
+        (command "_pedit" "_m" lines "" "_y" "" "_x")
+        (command "_pedit" lines "" "_x")
+      )
+      (princ (strcat "\n" (itoa (sslength lines)) " line(s) converted."))
+    )
+    (princ "\nno lines converted.")
+  )
+  (princ)
+)

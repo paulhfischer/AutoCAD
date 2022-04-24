@@ -1,0 +1,45 @@
+(defun c:count_blocks (/ _get_blocks _add_to_counter _block_name _count_blocks _print_counter)
+  (defun _get_blocks ()
+    (ssget '((0 . "INSERT")))
+  )
+
+  (defun _add_to_counter (blockname counter / entry)
+    (if (setq entry (assoc blockname counter))
+      (subst (cons blockname (1+ (cdr entry))) entry counter)
+      (cons (cons blockname 1) counter)
+    )
+  )
+
+  (defun _block_name (block)
+    (cdr (assoc 2 (entget block)))
+  )
+
+  (defun _count_blocks (blocks / i block counter)
+    (if blocks
+      (repeat (setq i (sslength blocks))
+        (setq block (ssname blocks (setq i (1- i))))
+        (setq counter (_add_to_counter (_block_name block) counter))
+      )
+    )
+    counter
+  )
+
+  (defun _print_counter (counter / _print_entry entry)
+    (defun _print_entry (entry / key value dots)
+      (setq key (car entry))
+      (setq value (itoa (cdr entry)))
+      (setq dots "")
+      (while (< (+ (strlen key) (strlen dots) (strlen value)) 80)
+        (setq dots (strcat dots "."))
+      )
+      (princ (strcat "\n" key dots value))
+    )
+
+    (foreach entry (vl-sort counter (function (lambda (a b) (< (car a) (car b)))))
+      (_print_entry entry)
+    )
+  )
+
+  (_print_counter (_count_blocks (_get_blocks)))
+  (princ)
+)
